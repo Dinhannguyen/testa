@@ -1,25 +1,32 @@
-repeat wait() until game:IsLoaded() and game.Players.LocalPlayer
+-- Script Main điều khiển Script A, B, C trong Blox Fruits
+-- Ưu tiên: B -> A -> C
+-- Chỉ chạy nếu Leviathan Heart >=1
+-- Hop server khi đủ điều kiện B hoặc A
+-- Dừng khi có Sanguine Art
+-- Tích hợp GUI với log
+
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local TeleportService = game:GetService("TeleportService")
 
--- Tạo GUI di chuyển được + dòng log
-local function createDraggableGUI()
+-- Biến toàn cục cho trạng thái
+local runningScript = nil -- "B", "A", "C" hoặc nil
+local hasSanguineArt = false
+
+-- Tạo GUI nhỏ gọn với log
+local function createGUI()
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "InventoryCheckGUI"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 220, 0, 180)
-    Frame.Position = UDim2.new(0.85, 0, 0.02, 0)
+    Frame.Size = UDim2.new(0, 200, 0, 180) -- Thu nhỏ GUI
+    Frame.Position = UDim2.new(0.02, 0, 0.3, 0) -- Góc trái, giữa phần trên (30% từ đỉnh)
     Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Frame.BackgroundTransparency = 0.2
     Frame.BorderSizePixel = 2
     Frame.BorderColor3 = Color3.fromRGB(0, 170, 255)
-    Frame.Active = true
-    Frame.Draggable = true
     Frame.Parent = ScreenGui
 
     local Title = Instance.new("TextLabel")
@@ -28,7 +35,7 @@ local function createDraggableGUI()
     Title.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.Text = "Inventory Check"
-    Title.Font = Enum.Font.GothamBlack
+    Title.Font = Enum.Font.GothamBlack -- Phông mập mạp
     Title.TextSize = 16
     Title.Parent = Frame
 
@@ -37,9 +44,9 @@ local function createDraggableGUI()
     VampireFangLabel.Size = UDim2.new(1, -10, 0, 25)
     VampireFangLabel.Position = UDim2.new(0, 5, 0, 30)
     VampireFangLabel.BackgroundTransparency = 1
-    VampireFangLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    VampireFangLabel.TextColor3 = Color3.fromRGB(128, 128, 128) -- Màu xám cho Vampire Fang
     VampireFangLabel.Text = "Vampire Fang: Loading..."
-    VampireFangLabel.Font = Enum.Font.GothamBlack
+    VampireFangLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
     VampireFangLabel.TextSize = 14
     VampireFangLabel.TextXAlignment = Enum.TextXAlignment.Left
     VampireFangLabel.Parent = Frame
@@ -49,9 +56,8 @@ local function createDraggableGUI()
     DemonicWispLabel.Size = UDim2.new(1, -10, 0, 25)
     DemonicWispLabel.Position = UDim2.new(0, 5, 0, 55)
     DemonicWispLabel.BackgroundTransparency = 1
-    DemonicWispLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DemonicWispLabel.Text = "Demonic Wisp: Loading..."
-    DemonicWispLabel.Font = Enum.Font.GothamBlack
+    DemonicWispLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Màu đỏ cho Demonic Wisp
+    DemonicWispLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
     DemonicWispLabel.TextSize = 14
     DemonicWispLabel.TextXAlignment = Enum.TextXAlignment.Left
     DemonicWispLabel.Parent = Frame
@@ -61,9 +67,8 @@ local function createDraggableGUI()
     LeviathanHeartLabel.Size = UDim2.new(1, -10, 0, 25)
     LeviathanHeartLabel.Position = UDim2.new(0, 5, 0, 80)
     LeviathanHeartLabel.BackgroundTransparency = 1
-    LeviathanHeartLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    LeviathanHeartLabel.Text = "Leviathan Heart: Loading..."
-    LeviathanHeartLabel.Font = Enum.Font.GothamBlack
+    LeviathanHeartLabel.TextColor3 = Color3.fromRGB(0, 0, 139) -- Màu xanh đậm cho Leviathan Heart
+    LeviathanHeartLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
     LeviathanHeartLabel.TextSize = 14
     LeviathanHeartLabel.TextXAlignment = Enum.TextXAlignment.Left
     LeviathanHeartLabel.Parent = Frame
@@ -73,9 +78,8 @@ local function createDraggableGUI()
     DarkFragmentLabel.Size = UDim2.new(1, -10, 0, 25)
     DarkFragmentLabel.Position = UDim2.new(0, 5, 0, 105)
     DarkFragmentLabel.BackgroundTransparency = 1
-    DarkFragmentLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    DarkFragmentLabel.Text = "Dark Fragment: Loading..."
-    DarkFragmentLabel.Font = Enum.Font.GothamBlack
+    DarkFragmentLabel.TextColor3 = Color3.fromRGB(128, 0, 128) -- Màu tím cho Dark Fragment
+    DarkFragmentLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
     DarkFragmentLabel.TextSize = 14
     DarkFragmentLabel.TextXAlignment = Enum.TextXAlignment.Left
     DarkFragmentLabel.Parent = Frame
@@ -83,11 +87,11 @@ local function createDraggableGUI()
     local LogLabel = Instance.new("TextLabel")
     LogLabel.Name = "LogLabel"
     LogLabel.Size = UDim2.new(1, -10, 0, 25)
-    LogLabel.Position = UDim2.new(0, 5, 0, 140)
+    LogLabel.Position = UDim2.new(0, 5, 0, 130)
     LogLabel.BackgroundTransparency = 1
-    LogLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-    LogLabel.Text = "Log: Waiting..."
-    LogLabel.Font = Enum.Font.GothamBlack
+    LogLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Màu trắng cho log
+    LogLabel.Text = "Log: (Waiting...)"
+    LogLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
     LogLabel.TextSize = 14
     LogLabel.TextXAlignment = Enum.TextXAlignment.Left
     LogLabel.Parent = Frame
@@ -95,9 +99,12 @@ local function createDraggableGUI()
     return VampireFangLabel, DemonicWispLabel, LeviathanHeartLabel, DarkFragmentLabel, LogLabel
 end
 
+-- Hàm đếm các item và check Sanguine Art
 local function countItems()
     local inventory = ReplicatedStorage.Remotes.CommF_:InvokeServer("getInventory")
     local vampireFangCount, demonicWispCount, leviathanHeartCount, darkFragmentCount = 0, 0, 0, 0
+    hasSanguineArt = false
+
     if inventory then
         for _, item in pairs(inventory) do
             if type(item) == "table" then
@@ -109,30 +116,88 @@ local function countItems()
                     leviathanHeartCount = item.Count or 1
                 elseif item.Name == "Dark Fragment" then
                     darkFragmentCount = item.Count or 1
+                elseif item.Name == "Sanguine Art" then
+                    hasSanguineArt = true
                 end
             end
         end
     end
+
     return vampireFangCount, demonicWispCount, leviathanHeartCount, darkFragmentCount
 end
 
-local function hasSanguineArt()
-    local inventory = ReplicatedStorage.Remotes.CommF_:InvokeServer("getInventory")
-    if inventory then
-        for _, item in pairs(inventory) do
-            if type(item) == "table" and item.Name == "Sanguine Art" then
-                return true
+-- Hàm hop server (reset script)
+local function hopServer()
+    print("Hopping server to reset...")
+    -- Code hop server đơn giản cho Blox Fruits (thay bằng code hop mày dùng)
+    local PlaceID = game.PlaceId
+    local AllIDs = {}
+    local foundAnything = ""
+    local actualHour = os.date("!*t").hour
+    local Deleted = false
+    local File = pcall(function()
+        AllIDs = game:GetService("HttpService"):JSONDecode(readfile("NotSameServers.json"))
+    end)
+    if not File then
+        table.insert(AllIDs, actualHour)
+        writefile("NotSameServers.json", game:GetService("HttpService"):JSONEncode(AllIDs))
+    end
+    function TPReturner()
+        local Site
+        if foundAnything == "" then
+            Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100'))
+        else
+            Site = game.HttpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. PlaceID .. '/servers/Public?sortOrder=Asc&limit=100&cursor=' .. foundAnything))
+        end
+        local ID = ""
+        if Site.nextPageCursor and Site.nextPageCursor ~= "null" and Site.nextPageCursor ~= nil then
+            foundAnything = Site.nextPageCursor
+        end
+        local num = 0
+        for i,v in pairs(Site.data) do
+            local Possible = true
+            ID = v.id
+            if tonumber(v.maxPlayers) > tonumber(v.playing) then
+                for _,Existing in pairs(AllIDs) do
+                    if num ~= 0 then
+                        if ID == tostring(Existing) then
+                            Possible = false
+                        end
+                    end
+                    if Possible == true then
+                        table.insert(AllIDs, ID)
+                        num = num + 1
+                    end
+                end
+                if Possible == true then
+                    table.insert(AllIDs, ID)
+                    wait()
+                    pcall(function()
+                        writefile("NotSameServers.json", game:GetService("HttpService"):JSONEncode(AllIDs))
+                        wait()
+                        game:GetService("TeleportService"):TeleportToPlaceInstance(PlaceID, ID, game.Players.LocalPlayer)
+                    end)
+                    wait(4)
+                end
             end
         end
     end
-    return false
+    function Teleport()
+        while wait() do
+            pcall(function()
+                TPReturner()
+                if foundAnything ~= "" then
+                    TPReturner()
+                end
+            end)
+        end
+    end
+    Teleport()
 end
 
-local function hopServer()
-    game:GetService("TeleportService"):Teleport(game.PlaceId)
-end
-
+-- Hàm chạy Script B
 local function runScriptB()
+    runningScript = "B"
     getgenv().Config = {
         ["Shoot Heart When Ice Spike Breaks"] = false,
         ["Drive Boat To Tiki"] = false,
@@ -140,6 +205,7 @@ local function runScriptB()
         ["Random Devil Fruit"] = false,
         ["Use skill fast dont hold"] = true,
         ["Webhook Shoot Heart Leviathan"] = false,
+        ["Drive Boat To Hydra"] = false,
         ["Auto Farm Material Sanguine Art"] = true,
         ["Webhook Unlock Draco v4"] = false,
         ["Auto light the torch"] = false,
@@ -149,30 +215,37 @@ local function runScriptB()
         ["Auto Chest Hop"] = false,
         ["Ping Discord"] = false,
         ["Webhook Drive To Tiki/Hydra"] = false,
-        ["Drive Boat To Hydra"] = false,
         ["Webhook Find Leviathan"] = false,
         ["Auto Craft Scroll"] = false,
         ["Account Buy Boat"] = false,
         ["Auto Store Fruit"] = false,
         ["Start Hunt Leviathan"] = false
     }
+    repeat wait() until game:IsLoaded() and game.Players.LocalPlayer
+    getgenv().Key = "e9162fb60364a89d94d75009"
     loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/refs/heads/main/BananaCat-KaitunLevi.lua"))()
 end
 
+-- Hàm chạy Script A
 local function runScriptA()
+    runningScript = "A"
     getgenv().Team = "Marines"
     loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/85e904ae1ff30824c1aa007fc7324f8f.lua"))()
 end
 
+-- Hàm chạy Script C
 local function runScriptC()
-    local AutoBuy = true
+    runningScript = "C"
+    local AutoBuy = true -- Every 10 seconds will automatically equip weapon again, true = on and false = off
     local MeleeNumber = 1
+
     local MeleeList = {
         [1] = "BuySanguineArt",
-        [2] = "BuyGodhuman",
+        [2] = "BuyGodhuman", 
         [3] = "BuyDragonTalon",
     }
-    function BuyMelee()
+
+    local function BuyMelee()
         local MeleeName = MeleeList[MeleeNumber]
         if MeleeName then
             pcall(function()
@@ -180,7 +253,9 @@ local function runScriptC()
             end)
         end
     end
+
     BuyMelee()
+
     if AutoBuy then
         spawn(function()
             while AutoBuy do
@@ -191,79 +266,63 @@ local function runScriptC()
     end
 end
 
+-- Hàm chính
 local function main()
-    local vampireLabel, demonicLabel, leviathanLabel, darkLabel, logLabel = createDraggableGUI()
-    local scriptBRunning, scriptARunning, scriptCRunning = false, false, false
+    local vampireLabel, demonicLabel, leviathanLabel, darkLabel, logLabel = createGUI()
 
-    while true do
-        local vampire, demonic, leviathan, dark = countItems()
-        vampireLabel.Text = "Vampire Fang: " .. tostring(vampire)
-        demonicLabel.Text = "Demonic Wisp: " .. tostring(demonic)
-        leviathanLabel.Text = "Leviathan Heart: " .. tostring(leviathan)
-        darkLabel.Text = "Dark Fragment: " .. tostring(dark)
+    -- Loop chính: Check và điều khiển script
+    task.spawn(function()
+        while true do
+            if hasSanguineArt then
+                runningScript = nil
+                logLabel.Text = "Log: (done)"
+                break -- Dừng hoàn toàn khi có Sanguine Art
+            end
 
-        if leviathan < 1 then
-            logLabel.Text = "Log: Chờ Leviathan Heart..."
-            wait(2)
-            continue
+            local success, vampireCount, demonicCount, leviathanCount, darkCount = pcall(countItems)
+            if success then
+                vampireLabel.Text = "Vampire Fang: " .. tostring(vampireCount)
+                demonicLabel.Text = "Demonic Wisp: " .. tostring(demonicCount)
+                leviathanLabel.Text = "Leviathan Heart: " .. tostring(leviathanCount)
+                darkLabel.Text = "Dark Fragment: " .. tostring(darkCount)
+
+                if leviathanCount < 1 then
+                    runningScript = nil
+                    logLabel.Text = "Log: (Waiting Leviathan Heart)"
+                else
+                    if vampireCount < 20 or demonicCount < 20 then
+                        if runningScript ~= "B" then
+                            runScriptB()
+                        end
+                        logLabel.Text = "Log: (vampire fang + demonic wisp)"
+                    elseif darkCount < 2 then
+                        if runningScript ~= "A" then
+                            hopServer() -- Hop khi đủ B
+                            runScriptA()
+                        end
+                        logLabel.Text = "Log: (hop darkbeak)"
+                    else
+                        if runningScript ~= "C" then
+                            hopServer() -- Hop khi đủ A
+                            runScriptC()
+                        end
+                        logLabel.Text = "Log: (done)"
+                    end
+                end
+            else
+                vampireLabel.Text = "Vampire Fang: Error"
+                demonicLabel.Text = "Demonic Wisp: Error"
+                leviathanLabel.Text = "Leviathan Heart: Error"
+                darkLabel.Text = "Dark Fragment: Error"
+                logLabel.Text = "Log: (Error)"
+            end
+            task.wait(2) -- Check mỗi 2s
         end
-
-        -- Ưu tiên script B
-        if vampire < 20 or demonic < 20 then
-            if not scriptBRunning then
-                logLabel.Text = "Log: ( vampire fang + demonic wisp )"
-                scriptBRunning = true
-                scriptARunning = false
-                scriptCRunning = false
-                runScriptB()
-            end
-            wait(2)
-            if vampire >= 20 and demonic >= 20 then
-                logLabel.Text = "Log: Đủ fang + wisp, hop server..."
-                wait(1)
-                hopServer()
-                break
-            end
-            continue
-        end
-
-        -- Nếu chưa đủ 2 dark fragment thì chạy script A
-        if dark < 2 then
-            if not scriptARunning then
-                logLabel.Text = "Log: ( hop darkbeak )"
-                scriptARunning = true
-                scriptBRunning = false
-                scriptCRunning = false
-                runScriptA()
-            end
-            wait(2)
-            if dark >= 2 then
-                logLabel.Text = "Log: Đủ dark fragment, hop server..."
-                wait(1)
-                hopServer()
-                break
-            end
-            continue
-        end
-
-        -- Nếu đã đủ tất cả thì chạy script C (chỉ chạy 1 lần)
-        if vampire >= 20 and demonic >= 20 and dark >= 2 then
-            if not hasSanguineArt() and not scriptCRunning then
-                logLabel.Text = "Log: ( done )"
-                scriptCRunning = true
-                scriptARunning = false
-                scriptBRunning = false
-                runScriptC()
-            elseif hasSanguineArt() then
-                logLabel.Text = "Log: Đã có Sanguine Art, dừng script."
-                break
-            end
-            wait(2)
-        end
-    end
+    end)
 end
 
+-- Gọi hàm chính
 local success, err = pcall(main)
 if not success then
-    warn("Lỗi khởi tạo script: " .. tostring(err))
+    print("Lỗi khởi tạo script main: " .. err)
 end
