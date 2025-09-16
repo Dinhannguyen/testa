@@ -4,7 +4,7 @@ local LocalPlayer = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local TeleportService = game:GetService("TeleportService")
 
--- Tích hợp GUI di chuyển được + dòng log
+-- Tạo GUI di chuyển được + dòng log
 local function createDraggableGUI()
     local ScreenGui = Instance.new("ScreenGui")
     ScreenGui.Name = "InventoryCheckGUI"
@@ -95,11 +95,9 @@ local function createDraggableGUI()
     return VampireFangLabel, DemonicWispLabel, LeviathanHeartLabel, DarkFragmentLabel, LogLabel
 end
 
--- Hàm đếm các item
 local function countItems()
     local inventory = ReplicatedStorage.Remotes.CommF_:InvokeServer("getInventory")
     local vampireFangCount, demonicWispCount, leviathanHeartCount, darkFragmentCount = 0, 0, 0, 0
-
     if inventory then
         for _, item in pairs(inventory) do
             if type(item) == "table" then
@@ -115,11 +113,9 @@ local function countItems()
             end
         end
     end
-
     return vampireFangCount, demonicWispCount, leviathanHeartCount, darkFragmentCount
 end
 
--- Kiểm tra đã có Sanguine Art chưa
 local function hasSanguineArt()
     local inventory = ReplicatedStorage.Remotes.CommF_:InvokeServer("getInventory")
     if inventory then
@@ -132,12 +128,10 @@ local function hasSanguineArt()
     return false
 end
 
--- Hàm hop sever
 local function hopServer()
-    TeleportService:Teleport(game.PlaceId)
+    game:GetService("TeleportService"):Teleport(game.PlaceId)
 end
 
--- Script B (ưu tiên)
 local function runScriptB()
     getgenv().Config = {
         ["Shoot Heart When Ice Spike Breaks"] = false,
@@ -165,13 +159,11 @@ local function runScriptB()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/refs/heads/main/BananaCat-KaitunLevi.lua"))()
 end
 
--- Script A
 local function runScriptA()
     getgenv().Team = "Marines"
     loadstring(game:HttpGet("https://api.luarmor.net/files/v3/loaders/85e904ae1ff30824c1aa007fc7324f8f.lua"))()
 end
 
--- Script C
 local function runScriptC()
     local AutoBuy = true
     local MeleeNumber = 1
@@ -199,7 +191,6 @@ local function runScriptC()
     end
 end
 
--- MAIN LOGIC
 local function main()
     local vampireLabel, demonicLabel, leviathanLabel, darkLabel, logLabel = createDraggableGUI()
     local scriptBRunning, scriptARunning, scriptCRunning = false, false, false
@@ -211,14 +202,13 @@ local function main()
         leviathanLabel.Text = "Leviathan Heart: " .. tostring(leviathan)
         darkLabel.Text = "Dark Fragment: " .. tostring(dark)
 
-        -- Chỉ bắt đầu khi có ít nhất 1 Leviathan Heart
         if leviathan < 1 then
             logLabel.Text = "Log: Chờ Leviathan Heart..."
             wait(2)
             continue
         end
 
-        -- Ưu tiên script B: Farm Vampire Fang & Demonic Wisp
+        -- Ưu tiên script B
         if vampire < 20 or demonic < 20 then
             if not scriptBRunning then
                 logLabel.Text = "Log: ( vampire fang + demonic wisp )"
@@ -228,7 +218,6 @@ local function main()
                 runScriptB()
             end
             wait(2)
-            -- Nếu đã đủ thì hop sever để reset script
             if vampire >= 20 and demonic >= 20 then
                 logLabel.Text = "Log: Đủ fang + wisp, hop server..."
                 wait(1)
@@ -248,7 +237,6 @@ local function main()
                 runScriptA()
             end
             wait(2)
-            -- Nếu đã đủ thì hop sever để reset script
             if dark >= 2 then
                 logLabel.Text = "Log: Đủ dark fragment, hop server..."
                 wait(1)
