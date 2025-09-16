@@ -21,8 +21,8 @@ local function createGUI()
     ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 
     local Frame = Instance.new("Frame")
-    Frame.Size = UDim2.new(0, 200, 0, 180) -- Thu nhỏ GUI
-    Frame.Position = UDim2.new(0.02, 0, 0.3, 0) -- Góc trái, giữa phần trên (30% từ đỉnh)
+    Frame.Size = UDim2.new(0, 200, 0, 180)
+    Frame.Position = UDim2.new(0.02, 0, 0.3, 0)
     Frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
     Frame.BackgroundTransparency = 0.2
     Frame.BorderSizePixel = 2
@@ -34,8 +34,8 @@ local function createGUI()
     Title.Position = UDim2.new(0, 0, 0, 0)
     Title.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Title.Text = "Inventory Check"
-    Title.Font = Enum.Font.GothamBlack -- Phông mập mạp
+    Title.Text = "FB-Di Nhân Nguyễn"
+    Title.Font = Enum.Font.GothamBlack
     Title.TextSize = 16
     Title.Parent = Frame
 
@@ -44,9 +44,8 @@ local function createGUI()
     VampireFangLabel.Size = UDim2.new(1, -10, 0, 25)
     VampireFangLabel.Position = UDim2.new(0, 5, 0, 30)
     VampireFangLabel.BackgroundTransparency = 1
-    VampireFangLabel.TextColor3 = Color3.fromRGB(128, 128, 128) -- Màu xám cho Vampire Fang
     VampireFangLabel.Text = "Vampire Fang: Loading..."
-    VampireFangLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
+    VampireFangLabel.Font = Enum.Font.GothamBlack
     VampireFangLabel.TextSize = 14
     VampireFangLabel.TextXAlignment = Enum.TextXAlignment.Left
     VampireFangLabel.Parent = Frame
@@ -56,8 +55,7 @@ local function createGUI()
     DemonicWispLabel.Size = UDim2.new(1, -10, 0, 25)
     DemonicWispLabel.Position = UDim2.new(0, 5, 0, 55)
     DemonicWispLabel.BackgroundTransparency = 1
-    DemonicWispLabel.TextColor3 = Color3.fromRGB(255, 0, 0) -- Màu đỏ cho Demonic Wisp
-    DemonicWispLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
+    DemonicWispLabel.Font = Enum.Font.GothamBlack
     DemonicWispLabel.TextSize = 14
     DemonicWispLabel.TextXAlignment = Enum.TextXAlignment.Left
     DemonicWispLabel.Parent = Frame
@@ -67,8 +65,7 @@ local function createGUI()
     LeviathanHeartLabel.Size = UDim2.new(1, -10, 0, 25)
     LeviathanHeartLabel.Position = UDim2.new(0, 5, 0, 80)
     LeviathanHeartLabel.BackgroundTransparency = 1
-    LeviathanHeartLabel.TextColor3 = Color3.fromRGB(0, 0, 139) -- Màu xanh đậm cho Leviathan Heart
-    LeviathanHeartLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
+    LeviathanHeartLabel.Font = Enum.Font.GothamBlack
     LeviathanHeartLabel.TextSize = 14
     LeviathanHeartLabel.TextXAlignment = Enum.TextXAlignment.Left
     LeviathanHeartLabel.Parent = Frame
@@ -78,8 +75,7 @@ local function createGUI()
     DarkFragmentLabel.Size = UDim2.new(1, -10, 0, 25)
     DarkFragmentLabel.Position = UDim2.new(0, 5, 0, 105)
     DarkFragmentLabel.BackgroundTransparency = 1
-    DarkFragmentLabel.TextColor3 = Color3.fromRGB(128, 0, 128) -- Màu tím cho Dark Fragment
-    DarkFragmentLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
+    DarkFragmentLabel.Font = Enum.Font.GothamBlack
     DarkFragmentLabel.TextSize = 14
     DarkFragmentLabel.TextXAlignment = Enum.TextXAlignment.Left
     DarkFragmentLabel.Parent = Frame
@@ -89,9 +85,9 @@ local function createGUI()
     LogLabel.Size = UDim2.new(1, -10, 0, 25)
     LogLabel.Position = UDim2.new(0, 5, 0, 130)
     LogLabel.BackgroundTransparency = 1
-    LogLabel.TextColor3 = Color3.fromRGB(255, 255, 255) -- Màu trắng cho log
-    LogLabel.Text = "Log: (Waiting...)"
-    LogLabel.Font = Enum.Font.GothamBlack -- Phông mập mạp
+    LogLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+    LogLabel.Text = "(Waiting...)"
+    LogLabel.Font = Enum.Font.GothamBlack
     LogLabel.TextSize = 14
     LogLabel.TextXAlignment = Enum.TextXAlignment.Left
     LogLabel.Parent = Frame
@@ -129,7 +125,6 @@ end
 -- Hàm hop server (reset script)
 local function hopServer()
     print("Hopping server to reset...")
-    -- Code hop server đơn giản cho Blox Fruits (thay bằng code hop mày dùng)
     local PlaceID = game.PlaceId
     local AllIDs = {}
     local foundAnything = ""
@@ -236,12 +231,12 @@ end
 -- Hàm chạy Script C
 local function runScriptC()
     runningScript = "C"
-    local AutoBuy = true -- Every 10 seconds will automatically equip weapon again, true = on and false = off
+    local AutoBuy = true
     local MeleeNumber = 1
 
     local MeleeList = {
         [1] = "BuySanguineArt",
-        [2] = "BuyGodhuman", 
+        [2] = "BuyGodhuman",
         [3] = "BuyDragonTalon",
     }
 
@@ -270,53 +265,63 @@ end
 local function main()
     local vampireLabel, demonicLabel, leviathanLabel, darkLabel, logLabel = createGUI()
 
-    -- Loop chính: Check và điều khiển script
     task.spawn(function()
         while true do
             if hasSanguineArt then
                 runningScript = nil
-                logLabel.Text = "Log: (done)"
-                break -- Dừng hoàn toàn khi có Sanguine Art
+                logLabel.Text = "(done)"
+                break
             end
 
             local success, vampireCount, demonicCount, leviathanCount, darkCount = pcall(countItems)
             if success then
                 vampireLabel.Text = "Vampire Fang: " .. tostring(vampireCount)
+                vampireLabel.TextColor3 = vampireCount >= 20 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+
                 demonicLabel.Text = "Demonic Wisp: " .. tostring(demonicCount)
+                demonicLabel.TextColor3 = demonicCount >= 20 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+
                 leviathanLabel.Text = "Leviathan Heart: " .. tostring(leviathanCount)
+                leviathanLabel.TextColor3 = leviathanCount >= 1 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
+
                 darkLabel.Text = "Dark Fragment: " .. tostring(darkCount)
+                darkLabel.TextColor3 = darkCount >= 2 and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
 
                 if leviathanCount < 1 then
                     runningScript = nil
-                    logLabel.Text = "Log: (Waiting Leviathan Heart)"
+                    logLabel.Text = "(Waiting Leviathan Heart)"
                 else
                     if vampireCount < 20 or demonicCount < 20 then
                         if runningScript ~= "B" then
                             runScriptB()
                         end
-                        logLabel.Text = "Log: (vampire fang + demonic wisp)"
+                        logLabel.Text = "(vampire fang + demonic wisp)"
                     elseif darkCount < 2 then
                         if runningScript ~= "A" then
-                            hopServer() -- Hop khi đủ B
+                            hopServer()
                             runScriptA()
                         end
-                        logLabel.Text = "Log: (hop darkbeak)"
+                        logLabel.Text = "(hop darkbeak)"
                     else
                         if runningScript ~= "C" then
-                            hopServer() -- Hop khi đủ A
+                            hopServer()
                             runScriptC()
                         end
-                        logLabel.Text = "Log: (done)"
+                        logLabel.Text = "(done)"
                     end
                 end
             else
                 vampireLabel.Text = "Vampire Fang: Error"
+                vampireLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
                 demonicLabel.Text = "Demonic Wisp: Error"
+                demonicLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
                 leviathanLabel.Text = "Leviathan Heart: Error"
+                leviathanLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
                 darkLabel.Text = "Dark Fragment: Error"
-                logLabel.Text = "Log: (Error)"
+                darkLabel.TextColor3 = Color3.fromRGB(255, 0, 0)
+                logLabel.Text = "(Error)"
             end
-            task.wait(2) -- Check mỗi 2s
+            task.wait(2)
         end
     end)
 end
