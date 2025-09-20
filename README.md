@@ -221,7 +221,7 @@ local function runScriptB()
         ["Start Hunt Leviathan"] = false
     }
     repeat wait() until game:IsLoaded() and game.Players.LocalPlayer
-    getgenv().Key = "e9162fb60364a89d94d75009"
+    getgenv().Key = "1fac947ad1d37c7fc21830fd"
     loadstring(game:HttpGet("https://raw.githubusercontent.com/obiiyeuem/vthangsitink/refs/heads/main/BananaCat-KaitunLevi.lua"))()
 end
 
